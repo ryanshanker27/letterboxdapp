@@ -8,10 +8,6 @@ import io
 
 start = tm.time()
 
-# os.environ["AWS_ACCESS_KEY_ID"] = "AKIATHVQLJPYKZH4HSNC"
-# os.environ["AWS_SECRET_ACCESS_KEY"] = "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"
-# os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
-
 ratings_db = build_rating_database(121)
 ratings_db.to_csv('ratings_db.csv')
 ratings_db = pd.read_csv('ratings_db.csv')
