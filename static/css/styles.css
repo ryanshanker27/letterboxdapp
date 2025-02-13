@@ -1,0 +1,293 @@
+/* Define font faces */
+@font-face {
+  font-family: 'Unna';
+  src: url('../fonts/Unna-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Unna';
+  src: url('../fonts/Unna-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Unna';
+  src: url('../fonts/Unna-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Unna';
+  src: url('../fonts/Unna-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+body {
+  font-family: 'Unna', serif;
+  margin: 20px;
+  background-color: #ffffff;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  color: #021a62;
+  font-size: 2em;
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+
+h2 {
+  color: black;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+  margin-left: 10em;
+  margin-right: 10em;
+  text-align: center;
+  font-weight: normal;
+}
+
+.error-message {
+  color: rgb(240, 54, 54);
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 5px;
+}
+
+#search-container {
+  text-align: center;
+  padding: 20px;
+  border: 1px navy;
+}
+
+.slider-container {
+  width: 50%;
+  margin: 20px auto;
+  align-items: center;
+}
+
+.slider-container label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Style for the min and max range labels */
+.slider-wrapper .min-value,
+.slider-wrapper .max-value {
+  width: 60px;           /* Adjust width as needed */
+  text-align: center;
+  font-size: 0.9em;
+  color: #333;
+}
+
+/* Make the slider fill the remaining space */
+.slider-wrapper input[type="range"] {
+  flex: 1;
+  margin: 0;
+}
+
+/* Display for the current slider value */
+.slider-display {
+  text-align: center;
+  margin-top: 4px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+input[type="text"] {
+  width: 50%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'Unna', serif;
+  align-items: center;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #0078d7;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+
+button {
+  font-size: 1rem;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Unna', serif;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+table {
+  border: 1px solid #40bcf4;
+  border-collapse: collapse; 
+  table-layout: auto;
+}
+
+th {
+  /* border: 1px solid #40bcf4; */
+  padding: 8px 12px; 
+}
+
+td {
+  /* border: 1px solid #40bcf4; */
+  padding: 8px 12px; 
+}
+
+thead th:nth-child(1) {
+  width: 18%;
+}
+
+thead th:nth-child(2) {
+  width: 20%;
+}
+
+thead th:nth-child(3),
+thead th:nth-child(4),
+thead th:nth-child(5),
+thead th:nth-child(7) {
+  width: 8%;
+}
+
+tbody td:nth-child(2) {
+  font-size: 27px;
+}
+
+tbody td:nth-child(3),
+tbody td:nth-child(4),
+tbody td:nth-child(5),
+tbody td:nth-child(6),
+tbody td:nth-child(7) {
+  font-size: 20px;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #6876bd;
+}
+
+
+img {
+  width: 200px; 
+  height: auto; 
+  border: 2px solid #000;
+}
+
+#genre-container {
+  margin-right: 20px;
+}
+
+#streaming-container {
+  margin-right: 20px;
+}
+
+#year-slider-container {
+  display: flex;
+  flex-direction: column;
+  margin-right: 40px;
+}
+
+.year-slider-wrapper {
+  margin-bottom: 15px;
+  margin-right: 40px;
+}
+
+.year-slider-wrapper label {
+  display: block;
+  font-weight: normal;
+  margin-bottom: 5px;
+}
+
+#runtime-slider-container {
+  display: flex;
+  flex-direction: column;
+  margin-right: 40px;
+}
+
+.runtime-slider-wrapper {
+  margin-bottom: 15px;
+  margin-right: 40px;
+}
+
+.runtime-slider-wrapper label {
+  display: block;
+  font-weight: normal;
+  margin-bottom: 5px;
+}
+
+
+.ui-slider {
+  width: 300px; /* Adjust slider width as needed */
+  margin-bottom: 5px;
+}
+
+#year-range, #runtime-range {
+  font-size: 14px;
+  color: #555;
+}
+
+#genre-filter {
+  padding: 5px;
+  font-size: 16px;
+  margin-right: 20px;
+}
+
+#streaming-filter {
+  padding: 5px;
+  font-size: 16px;
+  margin-right: 20px;
+}
+
+#filter-container {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+#credit-container {
+  text-align: center;
+}
+
+#credit-container img {
+  display: block;
+  margin: 0 auto;
+  border: none;
+}
+
+#search-container img {
+  border: none;
+}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="search-container">
+      <img src="{{ url_for('static', filename='icons/letterboxd.png') }}"
+        alt="Letterboxd" title="Letterboxd" style="height: 100px; width: auto;">
+      <h1>Letterboxd Recommendation Engine</h1>
+      <h2>This website uses rating data from your Letterboxd profile to deliver personalized movie recommendations tailored to your specific taste. By comparing your ratings with a database with ratings from thousands of Letterboxd users, this website's algorithm suggests films you haven't seen (or recorded) yet. Make sure you update your Letterboxd with all the movies you've watched and their ratings for the most accurate recommendations!</h2>
+      <h2>The table of recommended movies is filterable by genre, runtime, and streaming services for your convenience. Enter your Letterboxd username below and happy watching!</h2>
+
+      <form action="{{ url_for('main.submit') }}" method="post">
+        <label for="user_input"></label>
+        <input type="text" id="user_input" name="user_input" required placeholder="Enter Letterboxd username">
+
+        <div class="slider-container">
+          <label for="slider_value">Speed of Results</label>
+          <div class="slider-wrapper">
+            <span class="min-value">Faster, Random Results (&lt;10 s)</span>
+            <input type="range" id="slider_value" name="slider_value" min="0" max="100" value="50" step="10" oninput="updateSliderValue(this.value)">
+            <span class="min-value">Slower, Specific Results (&lt;30 s)</span>
+          </div>
+          <!-- <div class="slider-display">
+            <span class="slider_value" id="slider_value">50%</span>
+          </div> -->
+        </div>
+    
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+
+    {% if table_data == 1 %}
+      <div class="error-message">
+          <p>No ratings found for the given Letterboxd username. Please enter a valid username.</p>
+      </div>
+    {% elif table_data %}
+      <div id="filter-container">
+          <div id="genre-container">
+              <label for="genre-filter">Filter by Genre:</label>
+              <select id="genre-filter" multiple>
+                  {% for genre in ['Action', 'Adventure', 'Animation', 'Comedy',
+                  'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History',
+                  'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction',
+                  'TV Movie', 'Thriller', 'War', 'Western'] %}
+                  <option value="{{genre}}">{{genre}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div id="streaming-container">
+              <label for="streaming-filter">Filter by Streaming Service:</label>
+              <select id="streaming-filter" multiple>
+                  {% for streaming in ['Netflix', 'Hulu', 'Max', 'Amazon Prime Video', 
+                  'Apple TV Plus', 'Peacock Premium', 'Paramount Plus', 'Disney Plus', '
+                  Crunchyroll', 'Pluto TV', 'Tubi TV'] %}
+                  <option value="{{streaming}}">{{streaming}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="year-slider-wrapper">
+            <label for="year-slider">Year Range:</label>
+            <div id="year-slider"></div>
+            <span id="year-range"></span>
+          </div>
+              
+          <div class="runtime-slider-wrapper">
+              <label for="runtime-slider">Runtime Range:</label>
+              <div id="runtime-slider"></div>
+              <span id="runtime-range"></span>
+          </div>
+          
+      </div>
+
+      <table id="recommendations-table">
+          <thead>
+              <tr>
+                  <th>Poster</th>
+                  <th>Movie</th>
+                  <th>Year</th>
+                  <th>Rec Score</th>
+                  <th>Average Rating</th>
+                  <th>Genres</th>
+                  <!-- <th>Actors</th>
+                  <th>Director</th> -->
+                  <th>Runtime</th>
+                  <th>Streaming</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for row in table_data %}
+              <tr>
+                  <td><img src="{{row.poster}}" alt="{{row.film_title}}"></td>
+                  <td><a href="{{row.url}}" target="_blank"><strong>{{row.film_title}}</strong></a></td>
+                  <td>{{row.year|int}}</td>
+                  <td>{{row.rec_score}}</td>
+                  <td>{{row.avg_rating}}</td>
+                  <td>{{row.film_genres}}</td>
+                  <!-- <td>{{row.actors}}</td>
+                  <td>{{row.director}}</td> -->
+                  <td>{{row.runtime|int}}</td>
+                  <td>
+                    <span class="hidden-streams" style="display:none;">{{row.streaming}}</span>
+                    {% if row.streaming and row.streaming.strip() != '' %}
+                      {% for service in row.streaming.split(',') %}
+                        {% set serv = service.strip() %} 
+                        <img src = "{{ url_for('static', filename='icons/' ~ serv|lower|replace(' ', '') ~ '.png')}}"
+                        alt = "{{ serv }}" title = "{{ serv }}" style = "width: 75px; height: auto; margin-right: 5px;">
+                      {% endfor %}
+                    {% else %}
+                      <!-- No streaming data, cell empty -->
+                    {% endif %}
+                  </td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    {% endif %}
+      
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            function updateSliderValue(val) {
+              document.getElementById('slider_value').textContent = val + '%';
+            }
+
+            $(document).ready(function() {
+                var table = $('#recommendations-table').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    fixedHeader: true
+                });
+
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        var selectedGenre = $('#genre-filter').val();
+                        var genreData = data[5].toLowerCase();
+                        genreData = genreData.replace(/\s*,\s*/g, ',').trim();
+
+                        if (!selectedGenre || selectedGenre.length === 0) {
+                            return true;
+                        }
+
+                        var genresArray = genreData.split(',').map(function(genre) {
+                            return genre.trim().toLowerCase();
+                        });
+
+                        for (var i = 0; i < selectedGenre.length; i++) {
+                            if (genresArray.includes(selectedGenre[i].toLowerCase())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                );
+
+
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        var selectedStreaming = $('#streaming-filter').val();
+                        var streamingData = data[7].toLowerCase();
+                        streamingData = streamingData.replace(/\s*,\s*/g, ',').trim();
+
+                        if (!selectedStreaming || selectedStreaming.length === 0) {
+                            return true;
+                        }
+
+                        var streamArray = streamingData.split(',').map(function(streaming) {
+                            return streaming.trim().toLowerCase();
+                        });
+
+                        for (var i = 0; i < selectedStreaming.length; i++) {
+                            if (streamArray.includes(selectedStreaming[i].toLowerCase())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                );
+
+
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        var minYear = $('#year-slider').slider('values', 0);
+                        var maxYear = $('#year-slider').slider('values', 1);
+                        var year = parseFloat(data[2]) || 0;
+
+                        var minRuntime = $('#runtime-slider').slider('values', 0);
+                        var maxRuntime = $('#runtime-slider').slider('values', 1);
+                        var runtime = parseFloat(data[6]) || 0;
+
+                        if (
+                            (year >= minYear && year <= maxYear) &&
+                            (runtime >= minRuntime && runtime <= maxRuntime)
+                        ) {
+                            return true;
+                        }
+                        return false;
+                    }
+                );
+
+                $('#genre-filter').select2({
+                    placeholder: 'Select genres',
+                    allowClear: true
+                });
+
+                $('#genre-filter').on('change', function() {
+                    table.draw();
+                });
+
+                $('#streaming-filter').select2({
+                    placeholder: 'Select streaming services',
+                    allowClear: true
+                });
+
+                $('#streaming-filter').on('change', function() {
+                    table.draw();
+                });
+
+                initializeSlider('#year-slider', '#year-range', 1900, 2024, 1, table);
+                initializeSlider('#runtime-slider', '#runtime-range', 60, 240, 1, table);
+            });
+
+            function initializeSlider(slider, range, min, max, step, table) {
+                $(slider).slider({
+                    range: true,
+                    min: min,
+                    max: max,
+                    values: [min, max],
+                    step: step,
+                    slide: function(event, ui) {
+                        $(range).html(ui.values[0] + ' - ' + ui.values[1]);
+                        table.draw();
+                    }
+                });
+                $(range).html($(slider).slider('values', 0) + ' - ' + $(slider).slider('values', 1));
+            }
+        </script>
+      
+
+      <div id="credit-container">
+        <h2>Thank you to TMDB for providing access to their API for quick and easy searching of streaming services for films.</h2>
+        <img src="{{ url_for('static', filename='icons/tmdb.png') }}"
+        alt="TMDB" title="TMDB" style="height: 40px; width: auto;">
+      </div>
+  </body>
+</html>
