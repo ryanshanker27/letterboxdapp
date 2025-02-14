@@ -7,6 +7,7 @@ main = Blueprint('main', __name__)
 
 @main.route("/", methods=["GET"])
 def index():
+    print("Good")
     # Render the form for user input.
     return render_template('form_template.html')
 

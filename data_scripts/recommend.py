@@ -14,6 +14,7 @@ from tqdm import tqdm
 import numpy as np
 from joblib import Parallel, delayed
 import itertools
+import logging
 
 def recommend(username, user_speed):
     print('Check 1')
