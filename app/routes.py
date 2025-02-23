@@ -18,6 +18,7 @@ def submit():
     if user_input:
         # Feed input into function
         user_speed = request.form.get("slider_value")
+        print('Good 2')
         result = recommend.recommend(user_input, user_speed)
         if result is None:
             table_data = 1
