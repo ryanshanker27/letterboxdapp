@@ -53,8 +53,16 @@ def get_user_films(username):
     except:
         num_pages = 1
     # parallelize pulling of films and ratings
-    films = Parallel(n_jobs=-1)(delayed(get_user_films_page)(username, page, session) for page in range(1, num_pages+1))
-    return pd.DataFrame(list(itertools.chain(*films)))
+    with ThreadPoolExecutor() as executor:
+        # schedule function calls for each of the worker threads
+        results = executor.map(get_user_films_page, [username]*num_pages, range(1, num_pages+1), [session]*num_pages)
+        # retrieve film info if info is available
+        films = []
+        for result in results:
+            films.extend(result)
+    # films = Parallel(n_jobs=-1)(delayed(get_user_films_page)(username, page, session) for page in range(1, num_pages+1))
+    return pd.DataFrame(films)
+
 
 def get_user_ratings(username):
     # create session for repeated requests
