@@ -1,1 +1,1 @@
-web: gunicorn application:app --bind 0.0.0.0:$PORT --log-file --timeout 120
+web: gunicorn application:app --timeout 120 --bind 0.0.0.0:$PORT --log-file -
