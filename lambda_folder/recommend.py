@@ -2,14 +2,11 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import time as tm
-from numpy.linalg import svd 
 from helpers import get_user_films, fit_svd_and_predict
 from surprise.prediction_algorithms import SVD, KNNBasic, KNNBaseline, SVDpp, NMF, KNNWithMeans
 from surprise import Dataset, Reader, accuracy
 from tqdm import tqdm
-import numpy as np
-from joblib import Parallel, delayed
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import itertools
 
 def recommend(username, user_speed):
@@ -51,7 +48,7 @@ def recommend(username, user_speed):
     chunks = [new_df[i:i+size] for i in range(0, len(new_df), size)]
 
     # fit individual SVD models to each chunk
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ProcessPoolExecutor(max_workers=n_chunks) as executor:
         futures = [executor.submit(fit_svd_and_predict, chunk, userfilms) for chunk in chunks]
         preds = [future.result() for future in as_completed(futures)]
     # preds = Parallel(n_jobs=-1)(delayed(fit_svd_and_predict)(chunk, userfilms) for chunk in chunks)

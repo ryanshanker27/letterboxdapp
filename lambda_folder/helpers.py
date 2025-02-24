@@ -61,13 +61,14 @@ def get_user_films(username):
     return pd.DataFrame(films)
 
 def fit_svd_and_predict(df, userfilms):
+    print('SVD running', tm.time())
     # adjust scale for SVD model
     scale = (min(df.adj_rating), max(df.adj_rating))
     # load the trainset with appropriate scale
     fulldata = Dataset.load_from_df(df[['username', 'film_id', 'adj_rating']], 
                                     reader = Reader(rating_scale = scale)).build_full_trainset()
     # initialize SVD and fit
-    svd_all = SVD(n_factors = 500, 
+    svd_all = SVD(n_factors = 100, 
           reg_all = 0.075, 
           lr_all = 0.005, biased = False)
     svd_all.fit(fulldata)
@@ -79,6 +80,7 @@ def fit_svd_and_predict(df, userfilms):
     not_watched = [item_id for item_id in all_raw_ids if item_id not in raw_watched]
     # predict for all items that the user has not seen
     preds = [(item_id, svd_all.predict(userfilms.username.unique()[0], item_id).est) for item_id in not_watched]
+    print('SVD done', tm.time())
     return preds
 
 
