@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from data_scripts import recommend # Assuming your recommend module is inside data_scripts
+from data_scripts import recommend
 import re
 
 # Create a Blueprint named 'main'
@@ -24,10 +24,10 @@ def submit():
             table_data = 1
             return render_template('form_template.html', table_data = table_data)
         else:
-            # result['url'] = 'https://letterboxd.com/film/' + result['film_slug']
-            # result = result[['poster', 'film_title', 'year', 'rec_score', 'avg_rating',
-            #                 'film_genres', 'actors', 'director', 'runtime', 'streaming', 'url']]
-            # result['film_genres'] = result['film_genres'].str.replace(r'[\[\]"\'{}]', '', regex=True)
-            # result['streaming'] = result['streaming'].str.replace(r'[\[\]"\'{}]', '', regex=True)
+            result['url'] = 'https://letterboxd.com/film/' + result['film_slug']
+            result = result[['poster', 'film_title', 'year', 'rec_score', 'avg_rating',
+                            'film_genres', 'actors', 'director', 'runtime', 'streaming', 'url']]
+            result['film_genres'] = result['film_genres'].str.replace(r'[\[\]"\'{}]', '', regex=True)
+            result['streaming'] = result['streaming'].str.replace(r'[\[\]"\'{}]', '', regex=True)
             table_data = result.to_dict(orient='records')
             return render_template('form_template.html', table_data = table_data)
