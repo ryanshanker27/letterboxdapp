@@ -43,7 +43,7 @@ def recommend(username, user_speed):
     sample = 500000 + int((2000000 - 500000)*int(user_speed)/100)
     new_df = df.sample(sample, replace = False)
     # split the sample into equal chunks
-    n_chunks = 4
+    n_chunks = 5
     size = len(new_df) // n_chunks
     chunks = [new_df[i:i+size] for i in range(0, len(new_df), size)]
 

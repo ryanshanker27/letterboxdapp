@@ -40,7 +40,7 @@ def recommend(username, user_speed):
     df1 = pd.concat([ratings_df, pd.DataFrame(user_ratings)], ignore_index = False)
     df = df1.dropna(subset=['rating']).copy()
 
-    if user_speed >= 40 and len(user_ratings) > 100:
+    if user_speed >= 60 and len(user_ratings) > 100:
        # set importance ratio for user and item rating averages
         ratio = 0.5
         # take user and item averages
@@ -56,10 +56,10 @@ def recommend(username, user_speed):
     # print('DF constructed', p3 - p2)
 
     # sample ratings randomly
-    sample = 500000 + int((3000000 - 500000)*int(user_speed)/100)
+    sample = 500000 + int((2000000 - 500000)*int(user_speed)/100)
     new_df = df.sample(sample, replace = False)
     # split the sample into equal chunks
-    n_chunks = 4
+    n_chunks = 5
     size = len(new_df) // n_chunks
     chunks = [new_df[i:i+size] for i in range(0, len(new_df), size)]
 
