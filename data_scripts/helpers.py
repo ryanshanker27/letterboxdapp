@@ -114,7 +114,7 @@ def get_streaming_services(tmdb,
     # send get request
     response = requests.get(url, headers=headers)
     # check if there are streaming options for US
-    if 'US' in list(json.loads(response.text)['results'].keys()):
+    if 'US' in set(json.loads(response.text)['results'].keys()):
         # grab US results
         watch_types = [i for i in json.loads(response.text)['results']['US']]
         # add the paid streaming services (flatrate) to the list
@@ -124,7 +124,7 @@ def get_streaming_services(tmdb,
         if 'ads' in watch_types:
             services.extend([x['provider_name'] for x in json.loads(response.text)['results']['US']['ads']])
     # return only the services within the set specified above
-    return list(set(services).intersection(streamset))
+    return set(services).intersection(streamset)
 
 def get_film_info(film_title, film_slug, film_id = None):
     try:

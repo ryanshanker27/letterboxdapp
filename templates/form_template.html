@@ -227,7 +227,7 @@
                     table.draw();
                 });
 
-                initializeSlider('#year-slider', '#year-range', 1900, 2024, 1, table);
+                initializeSlider('#year-slider', '#year-range', 1900, 2025, 1, table);
                 initializeSlider('#runtime-slider', '#runtime-range', 60, 240, 1, table);
             });
 
@@ -249,13 +249,15 @@
       
 
       <div id="credit-container">
-        <h2>Thank you to TMDB for providing access to their API for quick and easy searching of streaming services for films.</h2>
+        <h2>Thank you to <a href="https://www.themoviedb.org/?language=en-US" target="_blank"><strong>TMDB</strong></a> for providing access to their API for quick and easy searching of streaming services for films.</h2>
         <img src="{{ url_for('static', filename='icons/tmdb.png') }}"
         alt="TMDB" title="TMDB" style="height: 40px; width: auto;">
       </div>
 
       <div id="code-container">
-        <h2>Code for the project can be found <a href="{{https://github.com/ryanshanker27/letterboxdapp}}" target="_blank"><strong>here</strong></h2>
+        <h2>
+          All code for the project can be found <a href="https://github.com/ryanshanker27/letterboxdapp" target="_blank"><strong>here</strong></a>.
+        </h2>
       </div>
   </body>
 </html>
