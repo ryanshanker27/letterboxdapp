@@ -258,7 +258,7 @@ def fit_svd_and_predict(df, userfilms):
     fulldata = Dataset.load_from_df(df[['username', 'film_id', 'adj_rating']], 
                                     reader = Reader(rating_scale = scale)).build_full_trainset()
     # initialize SVD and fit
-    svd_all = SVD(n_factors = 500, 
+    svd_all = SVD(n_factors = 350, 
           reg_all = 0.075, 
           lr_all = 0.005, biased = False)
     svd_all.fit(fulldata)

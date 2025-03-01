@@ -2,4 +2,6 @@
 *.pyc
 data_scripts/svd.ipynb
 data_scripts/recommend2.py
+data_scripts/update.ipynb
 folder.txt
+lambda_folder/

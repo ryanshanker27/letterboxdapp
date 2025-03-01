@@ -1,4 +1,4 @@
-/* Define font faces */
+/* Font */
 @font-face {
   font-family: 'Unna';
   src: url('../fonts/Unna-Regular.ttf') format('truetype');
@@ -31,8 +31,14 @@ body {
   font-family: 'Unna', serif;
   margin: 20px;
   background-color: #ffffff;
-  justify-content: center;
-  align-items: center;
+}
+
+/* Text */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 h1 {
@@ -43,11 +49,9 @@ h1 {
 }
 
 h2 {
-  color: black;
+  color: #000;
   font-size: 1.2em;
-  margin-bottom: 1em;
-  margin-left: 10em;
-  margin-right: 10em;
+  margin: 0 10em 1em;
   text-align: center;
   font-weight: normal;
 }
@@ -59,20 +63,33 @@ h2 {
   margin-top: 5px;
 }
 
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Search Container */
 #search-container {
   text-align: center;
   padding: 20px;
-  border: 1px navy;
+  border: none;
+  position: relative;
+}
+
+#search-container img,
+#credit-container img {
+  display: block;
+  margin: 0 auto;
+  border: none;
 }
 
 .slider-container {
   width: 50%;
   margin: 20px auto;
-  align-items: center;
 }
 
+/* Slider Container */
 .slider-container label {
-  display: block;
   font-weight: bold;
   margin-bottom: 2px;
 }
@@ -81,23 +98,18 @@ h2 {
   display: flex;
   align-items: center;
 }
-
-/* Style for the min and max range labels */
 .slider-wrapper .min-value,
 .slider-wrapper .max-value {
-  width: 60px;           /* Adjust width as needed */
+  width: 60px;
   text-align: center;
   font-size: 0.9em;
   color: #333;
 }
 
-/* Make the slider fill the remaining space */
 .slider-wrapper input[type="range"] {
   flex: 1;
   margin: 0;
 }
-
-/* Display for the current slider value */
 .slider-display {
   text-align: center;
   margin-top: 4px;
@@ -105,6 +117,7 @@ h2 {
   color: #333;
 }
 
+/* Text Input */
 input[type="text"] {
   width: 50%;
   padding: 8px;
@@ -114,7 +127,6 @@ input[type="text"] {
   margin-bottom: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-family: 'Unna', serif;
-  align-items: center;
 }
 
 input[type="text"]:focus {
@@ -123,12 +135,7 @@ input[type="text"]:focus {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-
+/* Submit Button */
 button {
   font-size: 1rem;
   padding: 10px 20px;
@@ -148,25 +155,21 @@ ul {
   list-style-type: disc;
   padding-left: 20px;
 }
-
 li {
   margin-bottom: 5px;
 }
 
+/* Table Formatting */
 table {
   border: 1px solid #40bcf4;
-  border-collapse: collapse; 
+  border-collapse: collapse;
   table-layout: auto;
+  margin: 20px auto;
 }
 
-th {
-  /* border: 1px solid #40bcf4; */
-  padding: 8px 12px; 
-}
-
+th,
 td {
-  /* border: 1px solid #40bcf4; */
-  padding: 8px 12px; 
+  padding: 8px 12px;
 }
 
 thead th:nth-child(1) {
@@ -200,95 +203,96 @@ tbody tr:nth-of-type(even) {
   background-color: #6876bd;
 }
 
-
+/* Images */
 img {
-  width: 200px; 
-  height: auto; 
+  width: 200px;
+  height: auto;
   border: 2px solid #000;
 }
 
-#genre-container {
-  margin-right: 20px;
-}
-
-#streaming-container {
-  margin-right: 20px;
-}
-
-#year-slider-container {
-  display: flex;
-  flex-direction: column;
-  margin-right: 40px;
-}
-
-.year-slider-wrapper {
-  margin-bottom: 15px;
-  margin-right: 40px;
-}
-
-.year-slider-wrapper label {
-  display: block;
-  font-weight: normal;
-  margin-bottom: 5px;
-}
-
+/* Filter Containers */
+#year-slider-container,
 #runtime-slider-container {
   display: flex;
   flex-direction: column;
   margin-right: 40px;
 }
 
-.runtime-slider-wrapper {
-  margin-bottom: 15px;
-  margin-right: 40px;
+#year-slider-container {
+  margin-left: 20px;
 }
 
+.year-slider-wrapper,
+.runtime-slider-wrapper {
+  margin: 0 40px 15px 0;
+}
+
+.year-slider-wrapper label,
 .runtime-slider-wrapper label {
-  display: block;
   font-weight: normal;
   margin-bottom: 5px;
 }
 
-
 .ui-slider {
-  width: 300px; /* Adjust slider width as needed */
+  width: 300px;
   margin-bottom: 5px;
 }
 
-#year-range, #runtime-range {
+#year-range,
+#runtime-range {
   font-size: 14px;
   color: #555;
 }
 
-#genre-filter {
-  padding: 5px;
-  font-size: 16px;
-  margin-right: 20px;
-}
-
+#genre-filter,
 #streaming-filter {
   padding: 5px;
   font-size: 16px;
-  margin-right: 20px;
 }
 
 #filter-container {
   display: flex;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
 }
 
+#filter-container > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20px;
+}
+
+/* TMDB Credit Container */
 #credit-container {
   text-align: center;
   margin-bottom: 2em;
 }
 
-#credit-container img {
-  display: block;
-  margin: 0 auto;
-  border: none;
+/* Loading Container */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #021a62;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+  display: flex;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-#search-container img {
-  border: none;
+#loading-container {
+  margin: 20px auto;
+  text-align: center;
+  font-size: 1.2em;
+  display: inline-flex;
+}
+
+#loading-container > div {
+  display: inline-flex;
+  align-items: center;
 }
