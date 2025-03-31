@@ -1,0 +1,13 @@
+name: Monthly Scheduled Data Update
+
+on:
+  schedule:
+    - cron: '0 0 31 3 *'  # minute hour day month (day of week)
+
+jobs:
+  run_script:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Python Script
+        run: python3 pull_data.py

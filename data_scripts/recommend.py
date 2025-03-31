@@ -13,6 +13,7 @@ from joblib import Parallel, delayed
 import itertools
 from collections import defaultdict
 import logging
+import random
 
 def recommend(username, user_speed):
     print(type(user_speed))

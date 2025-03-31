@@ -22,13 +22,10 @@
         <div class="slider-container">
           <label for="slider_value">Speed of Results</label>
           <div class="slider-wrapper">
-            <span class="min-value">Faster, Random Results (&lt;10 s)</span>
+            <span class="min-value">Faster, Random Results</span>
             <input type="range" id="slider_value" name="slider_value" min="0" max="100" value="50" step="10" oninput="updateSliderValue(this.value)">
-            <span class="min-value">Slower, Specific Results (&lt;30 s)</span>
+            <span class="min-value">Slower, Specific Results</span>
           </div>
-          <!-- <div class="slider-display">
-            <span class="slider_value" id="slider_value">50%</span>
-          </div> -->
         </div>
     
         <button type="submit">Submit</button>
@@ -137,11 +134,15 @@
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
+          // Function to update the slider display with the current value
             function updateSliderValue(val) {
+              // Set the text content of element to the passed value
               document.getElementById('slider_value').textContent = val + '%';
             }
 
+            // Genre filter
             $(document).ready(function() {
+              // Initialize table with paging, searching, ordering, and a fixed header
                 var table = $('#recommendations-table').DataTable({
                     paging: true,
                     searching: true,
@@ -151,18 +152,21 @@
 
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
+                      // Get selected genres from the filter
                         var selectedGenre = $('#genre-filter').val();
+                      // Get genre data from the data column and convert to lowercase and trim extra spaces
                         var genreData = data[5].toLowerCase();
                         genreData = genreData.replace(/\s*,\s*/g, ',').trim();
 
+                      // allow all rows in no genre selected
                         if (!selectedGenre || selectedGenre.length === 0) {
                             return true;
                         }
-
+                      // split genre data into array and trim and lowercase
                         var genresArray = genreData.split(',').map(function(genre) {
                             return genre.trim().toLowerCase();
                         });
-
+                      // check if any selected genres match a genre of the given row
                         for (var i = 0; i < selectedGenre.length; i++) {
                             if (genresArray.includes(selectedGenre[i].toLowerCase())) {
                                 return true;
@@ -172,21 +176,26 @@
                     }
                 );
 
-
+                // Streaming filter
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
+                      // Get selected streaming services from filter
                         var selectedStreaming = $('#streaming-filter').val();
+                      // Get streaming data from the data column and convert to lowercase and trim extra spaces
                         var streamingData = data[7].toLowerCase();
                         streamingData = streamingData.replace(/\s*,\s*/g, ',').trim();
 
+                      // allow all rows in no service selected
                         if (!selectedStreaming || selectedStreaming.length === 0) {
                             return true;
                         }
 
+                      // split streaming data into array and trim and lowercase
                         var streamArray = streamingData.split(',').map(function(streaming) {
                             return streaming.trim().toLowerCase();
                         });
 
+                      // check if any selected services match a genre of the given row
                         for (var i = 0; i < selectedStreaming.length; i++) {
                             if (streamArray.includes(selectedStreaming[i].toLowerCase())) {
                                 return true;
@@ -196,17 +205,22 @@
                     }
                 );
 
-
+                // Year and runtime slider filters
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
+                      // get min and max values from the year slider
                         var minYear = $('#year-slider').slider('values', 0);
                         var maxYear = $('#year-slider').slider('values', 1);
+                      // grab year from the table data and convert to float
                         var year = parseFloat(data[2]) || 0;
 
+                      // get min and max values from the runtime slider
                         var minRuntime = $('#runtime-slider').slider('values', 0);
                         var maxRuntime = $('#runtime-slider').slider('values', 1);
+                      // grab runtime from the table data and convert to float
                         var runtime = parseFloat(data[6]) || 0;
 
+                      // return true only if both year and runtime fall within selected ranges
                         if (
                             (year >= minYear && year <= maxYear) &&
                             (runtime >= minRuntime && runtime <= maxRuntime)
@@ -217,14 +231,17 @@
                     }
                 );
 
+                // initialize filter, all
                 $('#genre-filter').select2({
                     placeholder: 'Select genres',
                     allowClear: true
                 });
 
+                // allow table to dynamically change as function changes
                 $('#genre-filter').on('change', function() {
                     table.draw();
                 });
+
 
                 $('#streaming-filter').select2({
                     placeholder: 'Select streaming services',
@@ -239,25 +256,32 @@
                 initializeSlider('#runtime-slider', '#runtime-range', 60, 240, 1, table);
             });
 
+            // function to initialize slider
             function initializeSlider(slider, range, min, max, step, table) {
                 $(slider).slider({
+                  // enable range selection
                     range: true,
                     min: min,
                     max: max,
+                  // set slider values to the full range
                     values: [min, max],
                     step: step,
+                  // dynamically change the table
                     slide: function(event, ui) {
                         $(range).html(ui.values[0] + ' - ' + ui.values[1]);
                         table.draw();
                     }
                 });
+                // set initial display based on slider values
                 $(range).html($(slider).slider('values', 0) + ' - ' + $(slider).slider('values', 1));
             }
 
+            // hide loading container once window has finished
             window.onload = function() {
               document.getElementById('loading-container').style.display = 'none';
             };
 
+            // add event listener to display loading container when the input form is submitted
             document.getElementById('input-form').addEventListener('submit', function() {
               document.getElementById('loading-container').style.display = 'block';
             });

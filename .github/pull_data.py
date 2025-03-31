@@ -1,4 +1,4 @@
-from helpers import build_films_database, build_rating_database
+from data_scripts.helpers import build_films_database, build_rating_database
 import pandas as pd
 # from sqlalchemy import create_engine
 import time as tm
@@ -11,7 +11,6 @@ start = tm.time()
 ratings_db = build_rating_database(121)
 ratings_db.to_csv('ratings_db.csv')
 ratings_db = pd.read_csv('ratings_db.csv')
-ratings2 = ratings_db[['film_id', 'username', 'rating', 'film_slug']]
 
 # ratings2.to_sql('ratings', engine, if_exists='replace', index=False)
 
@@ -33,9 +32,9 @@ s3_client.upload_fileobj(
     Key='filminfo.parquet'
 )
 
-ratings2 = ratings2[ratings2.film_id.isin(filminfo.film_id)]
+ratings_db = ratings_db[ratings_db.film_id.isin(filminfo.film_id)]
 buffer = io.BytesIO()
-ratings2.to_parquet(buffer, engine='pyarrow', index=False)
+ratings_db.to_parquet(buffer, engine='pyarrow', index=False)
 buffer.seek(0)
 
 s3_client.upload_fileobj(
