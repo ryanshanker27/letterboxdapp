@@ -150,11 +150,11 @@ def get_film_info(film_title, film_slug, film_id = None):
         runtime = int(re.findall(r'\b\d+\b', runtime_text)[0])
         url = 'https://letterboxd.com/film/' + film_slug
         # find tmdb link
-        tmdb = soup.find('a', {'data-track-action': 'TMDb'})['href'] + 'watch'
+        tmdb = soup.find('a', {'data-track-action': 'TMDB'})['href'] + 'watch'
         # pull the streaming services
         streaming = get_streaming_services(tmdb)
-    except:
-        print(f"Error: {film_slug}")
+    except Exception as e:
+        print(f"Error: {film_slug}, Error: {e}")
         return
     # print({"film_title": film_title, "film_slug": film_slug,
     #         "film_id": film_id,  'film_poster': poster, 

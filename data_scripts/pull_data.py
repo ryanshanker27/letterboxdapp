@@ -1,15 +1,10 @@
-from data_scripts.helpers import build_films_database, build_rating_database
+from helpers import build_films_database, build_rating_database
 import pandas as pd
 # from sqlalchemy import create_engine
 import time as tm
 import os
 import boto3
 import io
-
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
-AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
 
 start = tm.time()
 
