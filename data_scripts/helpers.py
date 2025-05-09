@@ -41,7 +41,7 @@ def get_user_films_page(username, page, session):
 
 def get_user_films(username):
     # find the number of pages with films for the given user
-    url = f'https://letterboxd.com/{username}/films/page/1/'
+    url = f'https://letterboxd.com/{username}/films/by/popular/page/1/'
     # create session for repeated requests
     session = requests.Session()
     # send get request and parse HTML content
@@ -263,9 +263,9 @@ def fit_svd_and_predict(df, userfilms):
           lr_all = 0.005, biased = False)
     svd_all.fit(fulldata)
     # find film IDs that the user watched
-    raw_watched = set(userfilms.film_id)
+    raw_watched = set(userfilms.film_id.astype(int))
     # convert to SVD item ID
-    all_raw_ids = [fulldata.to_raw_iid(innerid) for innerid in fulldata.all_items()]
+    all_raw_ids = [int(fulldata.to_raw_iid(innerid)) for innerid in fulldata.all_items()]
     # return all SVD item IDs that the user has not seen
     not_watched = [item_id for item_id in all_raw_ids if item_id not in raw_watched]
     # predict for all items that the user has not seen

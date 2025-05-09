@@ -28,6 +28,9 @@ def submit():
             result = result[['poster', 'film_title', 'year', 'rec_score', 'avg_rating',
                             'film_genres', 'actors', 'director', 'runtime', 'streaming', 'url']]
             result['film_genres'] = result['film_genres'].str.replace(r'[\[\]"\'{}]', '', regex=True)
-            result['streaming'] = result['streaming'].astype(str).str.replace(r'[\[\]"\'{}]|set\(\)', '', regex=True)
+            print('Type Type:', type(result['streaming'][0]), type(result['streaming'][1]))
+            print(result['streaming'][:20])
+            result['streaming'] = result['streaming'].str.join(', ')
+            print(result['streaming'][:20])
             table_data = result.to_dict(orient='records')
             return render_template('form_template.html', table_data = table_data)
