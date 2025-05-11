@@ -34,4 +34,4 @@ A lower speed means a smaller matrix and faster training/prediction. A higher sp
 - Amazon S3: Employed for storing data assets and backups securely.
 
 ## Suggestions
-If anyone has any suggestions on how this site/engine can be improved, feel free to reach out at theryanshanker@gmail.com. Happy watching!
+If anyone has any suggestions on how this site/engine can be improved, feel free to reach out at ryanjshanker@gmail.com. Happy watching!
