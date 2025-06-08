@@ -59,7 +59,6 @@ def get_user_films(username):
         films = []
         for result in results:
             films.extend(result)
-    # films = Parallel(n_jobs=-1)(delayed(get_user_films_page)(username, page, session) for page in range(1, num_pages+1))
     return pd.DataFrame(films)
 
 
@@ -155,12 +154,6 @@ def get_film_info(film_title, film_slug, film_id = None):
     except Exception as e:
         print(f"Error: {film_slug}, Error: {e}")
         return
-    # print({"film_title": film_title, "film_slug": film_slug,
-    #         "film_id": film_id,  'film_poster': poster, 
-    #         "film_genres": genres, 'film_actors': actors, 
-    #         "film_director": director, "film_avg_rating": avg_rating, 
-    #         "film_rating_count": num_rating, "film_runtime": runtime, 
-    #         "film_year": year, "tmdb": tmdb})
     return {"film_title": film_title, "film_slug": film_slug,
             "film_id": film_id,  'poster': poster, 
             "film_genres": genres, 'actors': actors, 
@@ -190,17 +183,6 @@ def build_rating_database(pages):
         usernames.extend(page_users)
     # remove duplicates to ensure no redundance again
     usernames = list(set(usernames))
-    # for a in soup.find_all('a', class_ = 'name'):
-    #     # start = tm.time()
-    #     username = a['href'][1:-1]
-    #     # print(count, username)
-    #     user_ratings = pd.DataFrame(get_user_ratings(username))
-    #     ratings.append(user_ratings)
-    #     # dur = tm.time() - start
-    #     # print(len(user_ratings), dur, len(user_ratings)/dur)
-    #     # count += 1
-    #     # if count > 6:
-    #     #     return ratings
     # parallelize the pulling of ratings, distribute over 10 workers
     with ThreadPoolExecutor(max_workers=10) as executor:
         # schedule function calls for each of the worker threads
@@ -218,20 +200,16 @@ def build_rating_database(pages):
                 print(f"Error fetching ratings for {username}: {e}")
     # convert to a dataframe
     ratings = pd.DataFrame(ratings)
-    # ratings.to_csv("ratings_db.csv")
-    # print(ratings.columns)
     # keep only the films that at least 5% of the users in the database have seen
     num_users = ratings['username'].nunique()
     film_counts = ratings.groupby('film_id').size()
     valid_films = film_counts[film_counts >= (0.05 * num_users)].index
     ratings = ratings[ratings.film_id.isin(valid_films)]
-    # ratings.to_csv("ratings_db.csv")
     end = tm.time()
     return ratings
 
 def build_films_database(df):
     films = []
-    # df = pd.read_csv(df)
     # take ratings database in and grab the unique films
     pairs = df[['film_title', 'film_slug', 'film_id']].drop_duplicates()
     # separate the titles, slugs, and ids
@@ -299,8 +277,6 @@ def process_letterboxd_csv(csv_df, films_database):
                     'film_slug': film_info['film_slug'],
                     'rating': rating * 2 
                 })
-            else:
-                print(title, year, rating)
             # if no match found, ignore   
         except Exception as e:
             continue
@@ -330,23 +306,17 @@ def calculate_user_bias(user_ratings):
 
 def predict_user(item_embeddings, item_biases, userfilms):
     user_ratings = userfilms[userfilms.rating.notna()]
-    print('1')
     user_embedding = create_user_embedding(user_ratings, item_embeddings)
-    print('2')
     user_bias = calculate_user_bias(user_ratings)
-    print('3')
     watched = set(userfilms.film_id.astype(int))
     predictions = [(item_id, (user_bias + item_biases.get(item_id, 0) + np.dot(user_embedding, item_embedding))) \
                     for item_id, item_embedding in item_embeddings.items() if int(item_id) not in watched]
-    print('4')
     return sorted(predictions, key=lambda x: x[1], reverse = True)
 
 def predict(userfilms, item_embeddings, item_biases, randomness, filminfo):
     predictions = pd.DataFrame(predict_user(item_embeddings, item_biases, userfilms), 
                                columns = ['film_id', 'rec_score'])
-    print('Base predictions')
     recommendations_df = randomize(predictions, randomness, filminfo)
-    print('Randomized')
     return recommendations_df 
 
 def randomize(predictions, randomness, filminfo):
@@ -355,27 +325,19 @@ def randomize(predictions, randomness, filminfo):
     noise = np.random.normal(loc = 0.0, scale = 0.5 * 100 * np.std(predictions.rec_score)/100, size = predictions.rec_score.shape)
     predictions['rec_score'] = predictions['rec_score'] + noise
     predictions['film_id'] = predictions['film_id'].astype(int)
-    print('Random Noise')
     predictions.to_csv('preds.csv')
-    try:
-        recommendations_df = pd.merge(left=predictions, right=filminfo, how='left', on = 'film_id')
-    except Exception as e:
-        print(e)
-    print('Merge')
+    recommendations_df = pd.merge(left=predictions, right=filminfo, how='left', on = 'film_id')
     recommendations_df.to_csv('recdf.csv')
     N = len(recommendations_df)
     max_p = np.max(recommendations_df.rating_count)
     norm_popularity = recommendations_df.rating_count / max_p 
-    print('Max')
-    weights = (1.0 - norm_popularity) ** 1.3
+    weights = (1.0 - norm_popularity) ** 1.5
     sigma_base = np.std(recommendations_df.rec_score) 
     noise = np.random.normal(loc = 0.0, scale = 1.0, size = N)
-    print('Subcalcs')
-    perturbation_mag = 0.15 * sigma_base * weights * noise
+    perturbation_mag = 0.1 * sigma_base * weights * noise
     recommendations_df['rec_score'] = recommendations_df['rec_score'] + perturbation_mag
-    print('Popularity Noise Added')
     recommendations_df['rec_score'] = 1 + 9 * (recommendations_df.rec_score - min(recommendations_df.rec_score)) / (max(recommendations_df.rec_score) - min(recommendations_df.rec_score))
-    print('Returning Randomized')
+    recommendations_df['rec_score'] = recommendations_df['rec_score'].round(2)
     return recommendations_df.sort_values(by = 'rec_score', ascending = False)
 
 
