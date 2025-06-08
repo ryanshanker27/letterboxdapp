@@ -5,11 +5,27 @@ import numpy as np
 from joblib import Parallel, delayed
 import itertools
 from collections import defaultdict
+import io
+import boto3
+
+def load_npz_file(bucket, key):
+    try:
+        print('In')
+        s3 = boto3.client('s3')
+        print('Client')
+        obj = s3.get_object(Bucket = bucket, Key = key)
+        print('Object')
+        bytestream = io.BytesIO(obj['Body'].read())
+        print('Bytes')
+        return np.load(bytestream, allow_pickle=False)
+    except Exception as e:
+        print(e)
+        return np.load(bytestream, allow_pickle=False)
 
 def recommend_username(username, randomness):
     userfilms = get_user_films(username)
     filminfo = pd.read_parquet('s3://letterboxdrecommender/filminfo.parquet')
-    loaded_e = np.load("s3://letterboxdrecommender/item_embeddings.npz", allow_pickle=False)
+    loaded_e = load_npz_file('letterboxdrecommender', 'item_embeddings.npz')
 
     item_embeddings = {
         key: loaded_e[key].astype(np.float32)
@@ -17,7 +33,7 @@ def recommend_username(username, randomness):
     }
     loaded_e.close()
 
-    loaded_b = np.load("s3://letterboxdrecommender/item_biases.npz", allow_pickle=False)
+    loaded_b = load_npz_file('letterboxdrecommender', 'item_biases.npz')
     item_biases = {
         key: float(loaded_b[key].item())  # .item() turns a 0-D array into a Python float
         for key in loaded_b.files
@@ -30,7 +46,7 @@ def recommend_username(username, randomness):
 def recommend_csv(userfilms, randomness):
     filminfo = pd.read_parquet('s3://letterboxdrecommender/filminfo.parquet')
     print('Film Info')
-    loaded_e = np.load("s3://letterboxdrecommender/item_embeddings.npz", allow_pickle=False)
+    loaded_e = load_npz_file('letterboxdrecommender', 'item_embeddings.npz')
     print('Embeddings')
     userfilms = process_letterboxd_csv(userfilms, filminfo)
     print('Processed')
@@ -41,8 +57,7 @@ def recommend_csv(userfilms, randomness):
     }
     loaded_e.close()
 
-    # 2) Load biases.npz
-    loaded_b = np.load("s3://letterboxdrecommender/item_biases.npz", allow_pickle=False)
+    loaded_b = load_npz_file('letterboxdrecommender', 'item_biases.npz')
     item_biases = {
         key: float(loaded_b[key].item())  # .item() turns a 0-D array into a Python float
         for key in loaded_b.files
