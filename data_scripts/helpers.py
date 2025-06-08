@@ -5,14 +5,13 @@ import time as tm
 import json
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from surprise.prediction_algorithms import SVD, KNNBasic, KNNBaseline, SVDpp, NMF, KNNWithMeans
-from surprise import Dataset, Reader, accuracy
-from joblib import Parallel, delayed
-import itertools
+from surprise.prediction_algorithms import SVD
+from surprise import Dataset, Reader
+import numpy as np
 
 def get_user_films_page(username, page, session):
     # construct URL for current page
-    url = f'https://letterboxd.com/{username}/films/page/{str(page)}/'
+    url = f'https://letterboxd.com/{username}/films/by/popular/page/{str(page)}/'
     # send get request and parse HTML content
     site = session.get(url)
     soup = BeautifulSoup(site.text, 'html.parser')
@@ -41,7 +40,7 @@ def get_user_films_page(username, page, session):
 
 def get_user_films(username):
     # find the number of pages with films for the given user
-    url = f'https://letterboxd.com/{username}/films/by/popular/page/1/'
+    url = f'https://letterboxd.com/{username}/films/page/1/'
     # create session for repeated requests
     session = requests.Session()
     # send get request and parse HTML content
@@ -272,6 +271,112 @@ def fit_svd_and_predict(df, userfilms):
     preds = [(item_id, svd_all.predict(userfilms.username.unique()[0], item_id).est) for item_id in not_watched]
     return preds
 
+def process_letterboxd_csv(csv_df, films_database):
+    processed_data = []
+    username = "csv_user"
+    
+    for _, row in csv_df.iterrows():
+        try:
+            title = row['Name']
+            year = str(row['Year'])
+            rating = float(row['Rating'])
+            
+            if pd.isna(title) or pd.isna(year) or pd.isna(rating):
+                continue
+            
+            # exact title and year match
+            matches = films_database[
+                (films_database['film_title'] == title) &
+                (films_database['year'] == year)
+            ]
+            
+            if len(matches) > 0:
+                film_info = matches.iloc[0]
+                processed_data.append({
+                    'username': username,
+                    'film_id': film_info['film_id'],
+                    'film_title': title,
+                    'film_slug': film_info['film_slug'],
+                    'rating': rating * 2 
+                })
+            else:
+                print(title, year, rating)
+            # if no match found, ignore   
+        except Exception as e:
+            continue
+    
+    result_df = pd.DataFrame(processed_data)
+    return result_df
+
+def create_user_embedding(user_ratings, item_embeddings, n_factors = 1000):
+    embedding = np.zeros(n_factors)
+    weight_total = 0
+    for _, row in user_ratings.iterrows():
+        film_id = int(row['film_id'])
+        rating = float(row['rating'])
+
+        if film_id in item_embeddings:
+            weight = abs(rating - 5.5) + 1
+            embedding += weight * item_embeddings[str(film_id)]
+            weight_total += weight
+
+    if weight_total > 0:
+        embedding /= weight_total
+    
+    return embedding
+
+def calculate_user_bias(user_ratings):
+    return user_ratings['rating'].mean()
+
+def predict_user(item_embeddings, item_biases, userfilms):
+    user_ratings = userfilms[userfilms.rating.notna()]
+    print('1')
+    user_embedding = create_user_embedding(user_ratings, item_embeddings)
+    print('2')
+    user_bias = calculate_user_bias(user_ratings)
+    print('3')
+    watched = set(userfilms.film_id.astype(int))
+    predictions = [(item_id, (user_bias + item_biases.get(item_id, 0) + np.dot(user_embedding, item_embedding))) \
+                    for item_id, item_embedding in item_embeddings.items() if int(item_id) not in watched]
+    print('4')
+    return sorted(predictions, key=lambda x: x[1], reverse = True)
+
+def predict(userfilms, item_embeddings, item_biases, randomness, filminfo):
+    predictions = pd.DataFrame(predict_user(item_embeddings, item_biases, userfilms), 
+                               columns = ['film_id', 'rec_score'])
+    print('Base predictions')
+    recommendations_df = randomize(predictions, randomness, filminfo)
+    print('Randomized')
+    return recommendations_df 
+
+def randomize(predictions, randomness, filminfo):
+    if randomness == 0:
+        return pd.merge(left=predictions, right=filminfo, how='left', on = 'film_id')
+    noise = np.random.normal(loc = 0.0, scale = 0.5 * 100 * np.std(predictions.rec_score)/100, size = predictions.rec_score.shape)
+    predictions['rec_score'] = predictions['rec_score'] + noise
+    predictions['film_id'] = predictions['film_id'].astype(int)
+    print('Random Noise')
+    predictions.to_csv('preds.csv')
+    try:
+        recommendations_df = pd.merge(left=predictions, right=filminfo, how='left', on = 'film_id')
+    except Exception as e:
+        print(e)
+    print('Merge')
+    recommendations_df.to_csv('recdf.csv')
+    N = len(recommendations_df)
+    max_p = np.max(recommendations_df.rating_count)
+    norm_popularity = recommendations_df.rating_count / max_p 
+    print('Max')
+    weights = (1.0 - norm_popularity) ** 1.3
+    sigma_base = np.std(recommendations_df.rec_score) 
+    noise = np.random.normal(loc = 0.0, scale = 1.0, size = N)
+    print('Subcalcs')
+    perturbation_mag = 0.15 * sigma_base * weights * noise
+    recommendations_df['rec_score'] = recommendations_df['rec_score'] + perturbation_mag
+    print('Popularity Noise Added')
+    recommendations_df['rec_score'] = 1 + 9 * (recommendations_df.rec_score - min(recommendations_df.rec_score)) / (max(recommendations_df.rec_score) - min(recommendations_df.rec_score))
+    print('Returning Randomized')
+    return recommendations_df.sort_values(by = 'rec_score', ascending = False)
 
 
 

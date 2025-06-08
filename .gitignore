@@ -6,4 +6,9 @@ data_scripts/update.ipynb
 folder.txt
 .venv/
 data_scripts/ratings_db.csv
+data_scripts/ratings.csv
 data_scripts/filminfo.csv
+data_scripts/train_svd.ipynb
+data_scripts/embeddings/
+recdf.csv
+recs.csv

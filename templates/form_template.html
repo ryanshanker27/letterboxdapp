@@ -15,9 +15,40 @@
       <h2>This website uses rating data from your Letterboxd profile to deliver personalized movie recommendations tailored to your specific taste. By comparing your ratings with a database with ratings from thousands of Letterboxd users, this website's algorithm suggests films you haven't seen (or recorded) yet. Make sure you update your Letterboxd with all the movies you've watched and their ratings for the most accurate recommendations!</h2>
       <h2>The table of recommended movies is filterable by genre, runtime, and streaming services for your convenience. Enter your Letterboxd username below and happy watching!</h2>
 
-      <form id="input-form" action="{{ url_for('main.submit') }}" method="post">
-        <label for="user_input"></label>
-        <input type="text" id="user_input" name="user_input" required placeholder="Enter Letterboxd username">
+      <form id="input-form" action="{{ url_for('main.submit') }}" method="post" enctype="multipart/form-data">
+        <!-- Toggle Switch for Input Method -->
+        <div class="input-method-toggle">
+          <div class="toggle-container">
+            <button type="button" class="toggle-option active" data-method="username">Username</button>
+            <button type="button" class="toggle-option" data-method="csv">CSV Upload</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="input_method" name="input_method" value="username">
+
+        <div id="username-section" class="input-section active">
+          <label for="user_input"></label>
+          <input type="text" id="user_input" name="user_input" placeholder="Enter Letterboxd username">
+        </div>
+
+        <div id="csv-section" class="input-section">
+          <div class="csv-instructions">
+            <strong>CSV Upload Instructions:</strong><br>
+            1. Go to your Letterboxd profile → Settings → Data → Export your data<br>
+            2. Unzip the .zip file.<br>
+            3. Upload the file named <em>ratings.csv</em> here.<br>
+          </div>
+          
+          <div class="csv-upload-area" onclick="document.getElementById('csv-file').click()">
+            <div class="upload-content">
+              <p><strong>Click to select your Letterboxd ratings CSV</strong></p>
+              <p>or drag and drop it here</p>
+              <button type="button" class="upload-btn">Choose File</button>
+              <input type="file" id="csv-file" name="csv_file" class="file-input" accept=".csv" onchange="handleFileSelect(this)">
+            </div>
+            <div id="file-info" class="file-info"></div>
+          </div>
+        </div>
 
         <div class="slider-container">
           <label for="slider_value">Speed of Results</label>
@@ -27,7 +58,7 @@
             <span class="min-value">Slower, Specific Results</span>
           </div>
         </div>
-    
+
         <button type="submit">Submit</button>
       </form>
 
@@ -127,13 +158,132 @@
           </tbody>
       </table>
     {% endif %}
-      
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const toggleOptions = document.querySelectorAll('.toggle-option');
+            const inputSections = document.querySelectorAll('.input-section');
+            const inputMethodField = document.getElementById('input_method');
+            
+            toggleOptions.forEach(option => {
+              option.addEventListener('click', function() {
+                const method = this.getAttribute('data-method');
+                
+                // Update toggle buttons
+                toggleOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update input sections
+                inputSections.forEach(section => section.classList.remove('active'));
+                document.getElementById(method + '-section').classList.add('active');
+                
+                // Update hidden input
+                inputMethodField.value = method;
+                
+                // Clear the inactive input
+                if (method === 'username') {
+                  document.getElementById('csv-file').value = '';
+                  document.getElementById('file-info').textContent = '';
+                } else {
+                  document.getElementById('user_input').value = '';
+                }
+              });
+            });
+          });
+
+          // Only allow CSV files to be uploaded
+          function handleFileSelect(input) {
+            const fileInfo = document.getElementById('file-info');
+            if (input.files && input.files[0]) {
+              const file = input.files[0];
+              if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                fileInfo.textContent = `Selected: ${file.name}`;
+                fileInfo.style.color = '#021a62';
+              } else {
+                fileInfo.textContent = 'Please select a CSV file';
+                fileInfo.style.color = '#f00';
+                input.value = '';
+              }
+            }
+          }
+
+          // Allow for drag-and-drop of the file
+          document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.querySelector('.csv-upload-area');
+            const fileInput = document.getElementById('csv-file');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+              uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+              uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+              uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight(e) {
+              uploadArea.classList.add('dragover');
+            }
+            
+            function unhighlight(e) {
+              uploadArea.classList.remove('dragover');
+            }
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+              const dt = e.dataTransfer;
+              const files = dt.files;
+              
+              if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(fileInput);
+              }
+            }
+          });
+
+          // Validating if the user has provided the file
+          document.getElementById('input-form').addEventListener('submit', function(e) {
+            const inputMethod = document.getElementById('input_method').value;
+            const usernameInput = document.getElementById('user_input').value.trim();
+            const csvFile = document.getElementById('csv-file').files[0];
+            
+            if (inputMethod === 'username') {
+              if (!usernameInput) {
+                e.preventDefault();
+                alert('Please enter a Letterboxd username.');
+                return false;
+              }
+            } else if (inputMethod === 'csv') {
+              if (!csvFile) {
+                e.preventDefault();
+                alert('Please select a CSV file to upload.');
+                return false;
+              }
+              if (!csvFile.name.endsWith('.csv')) {
+                e.preventDefault();
+                alert('Please select a valid CSV file.');
+                return false;
+              }
+            }
+            
+            // Show loading container
+            document.getElementById('loading-container').style.display = 'block';
+          });
+
+
           // Function to update the slider display with the current value
             function updateSliderValue(val) {
               // Set the text content of element to the passed value
