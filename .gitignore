@@ -12,3 +12,4 @@ data_scripts/train_svd.ipynb
 data_scripts/embeddings/
 recdf.csv
 recs.csv
+preds.csv
