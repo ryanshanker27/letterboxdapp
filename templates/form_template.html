@@ -13,7 +13,8 @@
         alt="Letterboxd" title="Letterboxd" style="height: 100px; width: auto;">
       <h1>Letterboxd Recommendation Engine</h1>
       <h2>This website uses rating data from your Letterboxd profile to deliver personalized movie recommendations tailored to your specific taste. By comparing your ratings with a database with ratings from thousands of Letterboxd users, this website's algorithm suggests films you haven't seen (or recorded) yet. Make sure you update your Letterboxd with all the movies you've watched and their ratings for the most accurate recommendations!</h2>
-      <h2>The table of recommended movies is filterable by genre, runtime, and streaming services for your convenience. Either enter your Letterboxd username below or upload a CSV of your ratings data to generate the recommendations. Happy watching!</h2>
+      <h2>The table of recommended movies is filterable by genre, runtime, and streaming services for your convenience. Either enter your Letterboxd username below or upload a CSV of your ratings data to generate the recommendations.</h2>
+      <h2>Letterboxd is currently restricting API access, preventing us from being able to scrape user profiles. If the username input option does not work, please try the CSV upload option. Happy watching!</h2>
 
       <form id="input-form" action="{{ url_for('main.submit') }}" method="post" enctype="multipart/form-data">
         <div class="input-method-toggle">
